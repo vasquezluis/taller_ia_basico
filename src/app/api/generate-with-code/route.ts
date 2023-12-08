@@ -47,15 +47,22 @@ export async function POST(request: Request) {
       );
     } catch (error) {
       console.error("Error parsing the extracted object:", error);
+
+      return NextResponse.json(
+        {
+          message: "Error parsing the extracted object",
+        },
+        { status: 400 }
+      );
     }
   } else {
     console.error("Object section not found in the code string.");
 
-  return NextResponse.json(
-    {
-      message: "Codigo no corresponde al correcto",
-    },
-    { status: 400 }
-  );
+    return NextResponse.json(
+      {
+        message: "Codigo no corresponde al correcto",
+      },
+      { status: 400 }
+    );
   }
 }
