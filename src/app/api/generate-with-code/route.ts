@@ -20,7 +20,8 @@ export async function POST(request: Request) {
     );
   }
 
-  // Regular expression to match the object section
+try {
+    // Regular expression to match the object section
   const regex = /openai\.images\.generate\((\{[^]*?\})\)/;
 
   // Extract the matched object section
@@ -46,23 +47,31 @@ export async function POST(request: Request) {
         { status: 200 }
       );
     } catch (error) {
-      console.error("Error parsing the extracted object:", error);
 
       return NextResponse.json(
         {
-          message: "Error parsing the extracted object",
+          message: "Error en el código",
+          status: 400
         },
         { status: 400 }
       );
     }
   } else {
-    console.error("Object section not found in the code string.");
-
     return NextResponse.json(
       {
-        message: "Codigo no corresponde al correcto",
+        message: "El código no corresponde al correcto",
+        status: 400
       },
       { status: 400 }
     );
   }
+} catch (error) {
+    return NextResponse.json(
+      {
+        message: "Error en el servidor",
+        status: 500
+      },
+      { status: 500 }
+    );
+}
 }

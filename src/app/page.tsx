@@ -4,6 +4,9 @@ import { useState, FormEvent, ReactNode, type FC } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import CodeSVG from "./components/CodeSVG";
 import CloseCodeSVG from "./components/CloseCodeSVG";
 import GithubSVG from "./components/GithubSVG";
@@ -19,6 +22,19 @@ const navArray = [
     label: "Esta página",
   },
 ];
+
+const Toast = (message: string) => {
+  toast(message, {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+  });
+};
 
 interface SectionProps {
   children: ReactNode;
@@ -45,9 +61,12 @@ function Page() {
     setLoading(true);
 
     try {
-      // if (!prompt) return alert("No hay prompt para generar imagen");
+      if (!prompt) {
+        Toast("👀 Porfavor ingresa un prompt!");
+        return;
+      }
 
-      const response = await fetch("/api/generate", {
+      const response: any = await fetch("/api/generate", {
         method: "POST",
         body: JSON.stringify({ prompt }),
         headers: {
@@ -55,13 +74,18 @@ function Page() {
         },
       });
 
+      if (response.status === 400 || response.status === 500) {
+        Toast(`❌ ${response.message}`);
+        return;
+      }
+
       const data = await response.json();
       console.log("result: ", data);
 
       setImagen(data.url);
     } catch (error) {
       if (error instanceof Error) {
-        console.log("error: ", error.message)
+        console.log("error: ", error.message);
       }
     } finally {
       setLoading(false);
@@ -74,7 +98,10 @@ function Page() {
     setLoading(true);
 
     try {
-      // if(!code) return alert("No hay código para ejecutar");
+      if (!code) {
+        Toast("👻 Porfavor ingresa tu código!");
+        return;
+      }
 
       const response = await fetch("/api/generate-with-code", {
         method: "POST",
@@ -86,10 +113,15 @@ function Page() {
 
       const data = await response.json();
 
+      if (data.status === 400 || data.status === 500) {
+        Toast(`❌ ${data.message}`);
+        return;
+      }
+
       setImagen(data.url);
     } catch (error) {
       if (error instanceof Error) {
-        alert(error.message);
+        alert(error);
       }
     } finally {
       setLoading(false);
@@ -227,7 +259,7 @@ function Page() {
                 className="bg-neutral-600 text-white flex-grow-0 px-2 py-1 rounded-lg my-2 outline-none border-none"
                 onChange={(evt) => setPrompt(evt.target.value)}
                 type="text"
-                placeholder="gatito"
+                placeholder="gatito comiendo pizza..."
                 value={prompt}
               />
               <button
@@ -283,6 +315,19 @@ function Page() {
           )}
         </div>
       </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 }
