@@ -24,6 +24,7 @@ try {
   const response = await openai.images.generate({
     model: "dall-e-3",
     prompt: body.prompt,
+    quality: "standard",
     n: 1,
     size: "1024x1024",
   });
@@ -39,6 +40,9 @@ try {
     { status: 200 }
   );
 } catch (error) {
+  if(error instanceof Error){
+    console.log(error)
+  }
   return NextResponse.json(
     {
       message: "Error en el servidor",
